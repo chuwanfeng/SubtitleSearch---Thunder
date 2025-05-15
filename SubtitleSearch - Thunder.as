@@ -51,7 +51,6 @@ string GetLanguages()
     for(int i = 0, len = LangTable.size(); i < len; i++)
     {
         string lang = LangTable[i][0];
-
         if (!lang.empty())
         {
             if (ret.empty()) ret = lang;
@@ -64,31 +63,34 @@ string GetLanguages()
 string ServerCheck(string User, string Pass)
 {
     string ret = HostUrlGetString(API_URL);
+    if (ret.empty()) return "失败";
+
     JsonReader Reader;
     JsonValue Root;
 
     if (Reader.parse(ret, Root) && Root.isObject()) {
-        //如果code为0，获取data数据
         if (Root["code"].asInt() == 200) {
             return "成功";
         }
     }
 
     return "失败";
-
 }
 
 array<dictionary> SubtitleSearch(string MovieFileName, dictionary MovieMetaData)
 {
     array < dictionary > ret;
     string title = string(MovieMetaData["title"]);
+    if (title.empty()) return ret;
+
     string api = API_URL + title;
     string json = HostUrlGetString(api);
+    if (json.empty()) return ret;
+
     JsonReader Reader;
     JsonValue Root;
 
     if (Reader.parse(json, Root) && Root.isObject()) {
-        //如果code为0，获取data数据
         if(Root["code"].asInt() == 0){
             JsonValue data = Root["data"];
             if (data.isArray()) {
@@ -98,7 +100,9 @@ array<dictionary> SubtitleSearch(string MovieFileName, dictionary MovieMetaData)
                     item["title"] = data[i]["extra_name"].asString();
                     item["fileName"] = data[i]["name"].asString();
                     item["format"] = data[i]["ext"].asString();
-                    item["lang"] = data[i]["languages"][0].asString();
+                    if (data[i]["languages"].isArray() && data[i]["languages"].size() > 0) {
+                        item["lang"] = data[i]["languages"][0].asString();
+                    }
                     item["url"] = data[i]["url"].asString();
                     ret.insertLast(item);
                 }
