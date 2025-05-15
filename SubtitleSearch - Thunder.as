@@ -37,12 +37,12 @@ string GetTitle()
 
 string GetVersion()
 {
-    return "1.0";
+    return "1.2";
 }
 
 string GetDesc()
 {
-    return "https://api-shoulei-ssl.xunlei.com/oracle/subtitle?name=";
+    return "https://github.com/chuwanfeng/SubtitleSearch---Thunder";
 }
 
 string GetLanguages()
@@ -63,10 +63,19 @@ string GetLanguages()
 
 string ServerCheck(string User, string Pass)
 {
-    string ret = HostUrlGetString(GetDesc());
+    string ret = HostUrlGetString(API_URL);
+    JsonReader Reader;
+    JsonValue Root;
 
-    if (ret.empty()) return "失败";
-    return "成功";
+    if (Reader.parse(ret, Root) && Root.isObject()) {
+        //如果code为0，获取data数据
+        if (Root["code"].asInt() == 200) {
+            return "成功";
+        }
+    }
+
+    return "失败";
+
 }
 
 array<dictionary> SubtitleSearch(string MovieFileName, dictionary MovieMetaData)
